@@ -13,6 +13,9 @@ const PostSchema = mongoose.Schema({
   likes: {
     type: [String]
   },
+  unlikes: {
+    type: [String]
+  },
   image_links: {
     type: [String]
   },
@@ -84,6 +87,18 @@ module.exports.listPosts = function (filter, callback) {
     query['likes'] = { '$in': JSON.parse(filter.likes) }
   }
 
+  if (filter.unlikes) {
+    query['unlikes'] = { '$in': JSON.parse(filter.likes) }
+  }
+
+  if (filter.not_likes) {
+    query['likes'] = { '$nin': JSON.parse(filter.not_likes) }
+  }
+
+  if (filter.not_unlikes) {
+    query['unlikes'] = { '$nin': JSON.parse(filter.not_unlikes) }
+  }
+
   if (filter.start_created_at || filter.end_created_at) {
     var createdAtQuery = {}
     if (filter.start_created_at) { createdAtQuery['$gt'] = filter.start_created_at }
@@ -126,7 +141,7 @@ module.exports.like = function (id, likedUserId, callback) {
 // Unlike
 module.exports.unlike = function (id, likedUserId, callback) {
   var query = { '_id': id }
-  var updateQuery = { '$pull': { 'likes': likedUserId } }
+  var updateQuery = { '$addToSet': { 'unlikes': likedUserId } }
   Post.findOneAndUpdate(query, updateQuery, { 'new': true }, function (err, post) {
     if (err) callback(new Error(err))
     return callback(null, post)

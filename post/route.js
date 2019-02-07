@@ -50,16 +50,6 @@ router.get('/:postId', passport.authenticate('jwt', {
 router.get('/', passport.authenticate('jwt', {
   session: false
 }), (req, res, next) => {
-  if (req.query.feed) {
-    req.query.none_community = true
-    req.query.users = req.user.following
-    req.query.users.push(req.user._id.toString())
-  }
-
-  if (req.query.community_feed) {
-    req.query.communities = req.user.communities
-  }
-
   Post.listPosts(req.query, (err, posts) => {
     if (err) {
       return res.status(400).json({
